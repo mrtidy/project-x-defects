@@ -4,6 +4,41 @@
     <title>Product X Defects</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- keeping templates inline for this small app -->
+    <script id="defectsTemplate" type="text/html">
+        <table class="table table-bordered table-condensed table-hover">
+            {{#metadata}}
+                <thead>
+                    <tr>
+                        <th>{{date}}</th>
+                        {{#severities}}
+                            <th>{{.}}</th>
+                        {{/severities}}
+                        <th>To Verify</th>
+                        <th>Total Open Defects</th>
+                        <th>Total Bugs</th>
+                    </tr>
+                </thead>
+            {{/metadata}}
+            <tbody>
+                {{#defects}}
+                    <tr>
+                        <td>{{date}}</td>
+                        {{#severities}}
+                            <td>{{.}}</td>
+                        {{/severities}}
+                        <td>{{toVerify}}</td>
+                        <td>{{opened}}</td>
+                        <td>{{total}}</td>
+                    </tr>
+                {{/defects}}
+            </tbody>
+        </table>
+        {{^defects}}
+            <p>Our defects database appears to be empty.  Please add some data.</p>
+        {{/defects}}
+    </script>
 </head>
 
 <body>
@@ -13,39 +48,7 @@
         <div class="row">
             <div class="span8">
                 <h3>Defects List</h3>
-                <table class="table table-bordered table-condensed table-hover">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Sev2</th>
-                            <th>Sev3</th>
-                            <th>Sev4</th><th>To Verify</th>
-                            <th>Total Open Defects</th>
-                            <th>Total Bugs</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>2012-01-01</td><td>1</td><td>229</td><td>61</td><td>159</td><td>291</td><td>1223</td>
-                        </tr><tr>
-                            <td>2012-01-02</td><td>1</td><td>232</td><td>61</td><td>147</td><td>294</td><td>1228</td>
-                        </tr><tr>
-                            <td>2012-01-03</td><td>1</td><td>238</td><td>67</td><td>147</td><td>306</td><td>1240</td>
-                        </tr><tr>
-                            <td>2012-01-04</td><td>2</td><td>237</td><td>66</td><td>154</td><td>305</td><td>1252</td>
-                        </tr><tr>
-                            <td>2012-01-05</td><td>2</td><td>228</td><td>59</td><td>170</td><td>289</td><td>1261</td>
-                        </tr><tr>
-                            <td>2012-01-06</td><td>2</td><td>228</td><td>59</td><td>162</td><td>289</td><td>1263</td>
-                        </tr><tr>
-                            <td>2012-01-07</td><td>2</td><td>228</td><td>59</td><td>162</td><td>289</td><td>1263</td>
-                        </tr><tr>
-                            <td>2012-01-08</td><td>2</td><td>228</td><td>59</td><td>161</td><td>289</td><td>1263</td>
-                        </tr><tr>
-                            <td>2012-01-09</td><td>1</td><td>224</td><td>62</td><td>158</td><td>287</td><td>1267</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div id="defectsList"></div>
             </div>
             <div class="span4 visible-desktop">
                 <h3>Add Data</h3>
@@ -57,5 +60,7 @@
 
     <script src="http://code.jquery.com/jquery-latest.js"></script>
     <script src="js/bootstrap.min.js"></script>
+    <script src="js/mustache.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
