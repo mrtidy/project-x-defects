@@ -7,7 +7,7 @@
 
     <!-- keeping templates inline for this small app -->
     <script id="defectsTemplate" type="text/html">
-        <table class="table table-bordered table-condensed table-hover">
+        <table class="table table-bordered table-condensed table-hover table-striped">
             {{#metadata}}
                 <thead>
                     <tr>
@@ -52,8 +52,8 @@
             </div>
             <div class="span4 visible-desktop">
                 <h3>Add Data</h3>
-                <textarea class="span4" rows="6"></textarea>
-                <button class="btn pull-right" type="submit">Submit</button>
+                <textarea class="span4" id="rawData" rows="6"></textarea>
+                <button class="btn pull-right" id="submitData" type="submit">Submit</button>
             </div>
         </div>
     </div>
