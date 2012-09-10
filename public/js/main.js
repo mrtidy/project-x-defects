@@ -1,5 +1,6 @@
 "use strict";
 
+var averageTemplate = $("#averageTemplate").html();
 var defectsTemplate = $("#defectsTemplate").html();
 
 /*
@@ -8,6 +9,13 @@ var defectsTemplate = $("#defectsTemplate").html();
  */
 var updateDefectsList = function (defectData) {
   $("#defectsList").html(Mustache.render(defectsTemplate, defectData));
+
+  if(defectData.defects) {
+    var sum = _.reduce(defectData.defects, function (memo, row) {      
+      return parseInt(memo, 10) + parseInt(row.opened, 10);
+    }, 0);
+    $("#average").html(Mustache.render(averageTemplate, {average: parseInt(sum / defectData.defects.length, 10)}));
+  }
 }
 
 /*

@@ -46,7 +46,7 @@
     </script>
 
     <script id="averageTemplate" type="text/html">
-      {{}}
+      <p class="lead">The average number of defects opened per day is <strong>{{average}}</strong>.</p>
     </script>
 </head>
 
@@ -54,6 +54,7 @@
     <div class="container">
         <h1>Product X Defects</h1>
         <p>Use this page to keep up-to-date with the defect trends of Product X.</p>
+        <span id="average"></span>
         <div class="row">
             <div class="span8">
                 <h3>Defects List</h3>
@@ -69,6 +70,7 @@
 
     <script src="http://code.jquery.com/jquery-latest.js"></script>
     <script src="js/jquery.activity-indicator-1.0.0.min.js"></script>
+    <script src="js/underscore-min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/mustache.js"></script>
     <script src="js/main.js"></script>
