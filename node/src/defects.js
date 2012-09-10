@@ -13,8 +13,8 @@ var async = require('async'),
 
 var postgresUrl = process.env.DATABASE_URL || 'tcp://defects:defects@localhost/defects';
 
-var insertTemplate = 'INSERT INTO %s(date, severities, to_verify, opened, total) VALUES ($1, $2, $3, $4, $5)';
-var selectTemplate = 'SELECT date, severities, to_verify, opened, total FROM %s';
+var insertTemplate = 'INSERT INTO %s(date, sev1, sev2, sev3, to_verify, opened, total) VALUES ($1, $2, $3, $4, $5, $6, $7)';
+var selectTemplate = 'SELECT date, sev1, sev2, sev3, to_verify, opened, total FROM %s';
 
 /*
  * GET /defects will return the list of all defects available.  If there are
@@ -37,13 +37,10 @@ exports.get = function (req, res) {
         res.send('metadata table is corrupt', 500);
         return;
       }
-      winston.info("severities out: " + util.format('%s', metadataResult.rows[0].severities));
-      var severities = util.format('%s', metadataResult.rows[0].severities).replace(/^\{(.*)\}$/, '\[$1\]');
-      winston.info("severities out2: " + severities);
       var defectData = { metadata: {}, defects: [] };
       defectData.metadata = {
         date: metadataResult.rows[0].date,
-        severities: JSON.parse(severities),
+        severities: [metadataResult.rows[0].sev1, metadataResult.rows[0].sev2, metadataResult.rows[0].sev3],
         toVerify: metadataResult.rows[0].to_verify,
         opened: metadataResult.rows[0].opened,
         total: metadataResult.rows[0].total
@@ -62,7 +59,7 @@ exports.get = function (req, res) {
           async.forEach(defectsResult.rows, function (item, next) {
             defectData.defects.push({
               date: item.date,
-              severities: item.severities,
+              severities: [item.sev1, item.sev2, item.sev3],
               toVerify: item.to_verify,
               opened: item.opened,
               total: item.total
@@ -95,10 +92,8 @@ exports.post = function (req, res) {
   csv().fromStream(req).on('data', function (data, index) {
     if(index > 0) {
       pg.connect(postgresUrl, function(err, client) {
-        var severities = util.format('{ %s }', data.slice(1, -3));
-        winston.info(severities);
         client.query(util.format(insertTemplate, 'defect_count'), [
-          data[0], severities, data[rowLength - 3], data[rowLength - 2], data[rowLength - 1]],
+          data[0], data[1], data[2], data[3], data[4], data[5], data[6]],
           function (err, defectsResult) {
             if(err != null) {
               winston.warn(util.format('unexpected error inserting detect counts: %s', err));
@@ -111,9 +106,8 @@ exports.post = function (req, res) {
     } else {
       rowLength = data.length;
       pg.connect(postgresUrl, function(err, client) {
-        var severities = util.format('{ %s }', data.slice(1, -3));
         client.query(util.format(insertTemplate, 'metadata'), [
-          data[0], severities, data[rowLength - 3], data[rowLength - 2], data[rowLength - 1]],
+          data[0], data[1], data[2], data[3], data[4], data[5], data[6]],
           function (err, defectsResult) {
             if(err != null) {
               winston.warn(util.format('unexpected error inserting metadata: %s', err));

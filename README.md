@@ -49,14 +49,18 @@ postgres=# ^D
 $ psql -U defects defects
 postgres=# CREATE TABLE metadata (
 	date VARCHAR(80) NOT NULL,
-	severities VARCHAR(80)[] NOT NULL,
+	sev1 VARCHAR(80) NOT NULL,
+	sev2 VARCHAR(80) NOT NULL,
+	sev3 VARCHAR(80) NOT NULL,
 	to_verify VARCHAR(80) NOT NULL,
 	opened VARCHAR(80) NOT NULL,
 	total VARCHAR(80) NOT NULL
 );
 postgres=# CREATE TABLE defect_count (
 	date DATE PRIMARY KEY,
-	severities INTEGER[] NOT NULL,
+	sev1 INTEGER NOT NULL,
+	sev2 INTEGER NOT NULL,
+	sev3 INTEGER NOT NULL,
 	to_verify INTEGER NOT NULL,
 	opened INTEGER NOT NULL,
 	total INTEGER NOT NULL
