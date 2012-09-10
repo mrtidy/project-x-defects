@@ -22,3 +22,60 @@ Date,Sev2,Sev3,Sev4,To Verify,Total Open Defects,Total Bugs
 2012-01-08,2,228,59,161,289,1263
 2012-01-09,1,224,62,158,287,1267
 ```
+
+# Developer Guide #
+
+## Requirements ##
+
+You need to install Node v0.8.8, NPM v1.1.49, and PostgreSQL v8.4+ to be able to run the server-side portion of this.
+
+## Database Setup ##
+
+``` bash
+$ createuser -U postgres -P defects
+Enter password for new role: defects
+Enter it again: defects
+Shall the new role be a superuser? (y/n) y
+```
+
+``` bash
+$ psql -U defects postgres
+postgres=# CREATE DATABASE defects;
+CREATE DATABASE
+postgres=# ^D
+```
+
+``` bash
+$ psql -U defects defects
+postgres=# CREATE TABLE metadata (
+	date VARCHAR(80) NOT NULL,
+	sev1 VARCHAR(80) NOT NULL,
+	sev2 VARCHAR(80) NOT NULL,
+	sev3 VARCHAR(80) NOT NULL,
+	to_verify VARCHAR(80) NOT NULL,
+	opened VARCHAR(80) NOT NULL,
+	total VARCHAR(80) NOT NULL
+);
+postgres=# CREATE TABLE defect_count (
+	date DATE PRIMARY KEY,
+	sev1 INTEGER NOT NULL,
+	sev2 INTEGER NOT NULL,
+	sev3 INTEGER NOT NULL,
+	to_verify INTEGER NOT NULL,
+	opened INTEGER NOT NULL,
+	total INTEGER NOT NULL
+);
+```
+
+## Steps ##
+
+These steps assume that the requirements above have been installed and that node, npm, and psql are in your path.
+
+``` bash
+git clone git clone https://github.com/mrtidy/project-x-defects.git
+cd project-x-defects
+npm install
+node node/src/main.js
+```
+
+Now you can point your browser at http://localhost:8000/ to view the application.

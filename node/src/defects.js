@@ -5,23 +5,74 @@
  * defects.
  */
 
-var csv = require('csv'),
+var async = require('async'),
+  csv = require('csv'),
+  pg = require('pg'),
+  util = require('util'),
   winston = require('winston');
 
-// TODO - remove this; just temporarily holding the defect data in memory
-// until I get DB hooked up
-module.defectData;
+var postgresUrl = process.env.DATABASE_URL || 'tcp://defects:defects@localhost/defects';
+
+var insertTemplate = 'INSERT INTO %s(date, sev1, sev2, sev3, to_verify, opened, total) VALUES ($1, $2, $3, $4, $5, $6, $7)';
+var selectMetadataTemplate = 'SELECT date, sev1, sev2, sev3, to_verify, opened, total FROM metadata';
+var selectDefectsTemplate = "SELECT to_char(date, 'yyyy-mm-dd') AS date, sev1, sev2, sev3, to_verify, opened, total FROM defect_count";
 
 /*
  * GET /defects will return the list of all defects available.  If there are
  * no defects the this returns 404.
  */
 exports.get = function (req, res) {
-  if(module.defectData) {
-    res.send(module.defectData);
-  } else {
-    res.send(404);
-  }
+  pg.connect(postgresUrl, function(err, client) {
+    client.query(selectMetadataTemplate, function (err, metadataResult) {
+      if(err != null) {
+        winston.warn(util.format('unexpected error querying metadata: %s', err));
+        res.send(err, 500);
+        return;
+      }
+      if(metadataResult.rows.length < 1) {
+        res.send(404);
+        return;
+      }
+      if(metadataResult.rows.length > 1) {
+        winston.error('metadata corrupt; cleanup required');
+        res.send('metadata table is corrupt', 500);
+        return;
+      }
+      var defectData = { metadata: {}, defects: [] };
+      defectData.metadata = {
+        date: metadataResult.rows[0].date,
+        severities: [metadataResult.rows[0].sev1, metadataResult.rows[0].sev2, metadataResult.rows[0].sev3],
+        toVerify: metadataResult.rows[0].to_verify,
+        opened: metadataResult.rows[0].opened,
+        total: metadataResult.rows[0].total
+      };
+      pg.connect(postgresUrl, function(err, client) {
+        client.query(selectDefectsTemplate, function (err, defectsResult) {
+          if(err != null) {
+            winston.warn(util.format('unexpected error querying defect counts: %s', err));
+            res.send(err, 500);
+            return;
+          }
+          if(defectsResult.rows.length < 1) {
+            res.send(404);
+            return;
+          }
+          async.forEach(defectsResult.rows, function (item, next) {
+            defectData.defects.push({
+              date: item.date,
+              severities: [item.sev1, item.sev2, item.sev3],
+              toVerify: item.to_verify,
+              opened: item.opened,
+              total: item.total
+            });
+            next();
+          }, function (error) {
+            res.json(defectData, 200);
+          });
+        });
+      });
+    });
+  });
 };
 
 /*
@@ -38,29 +89,37 @@ exports.post = function (req, res) {
     return;
   }
 
-  var defectData = { metadata: {}, defects: [] };
   var rowLength;
   csv().fromStream(req).on('data', function (data, index) {
     if(index > 0) {
-      defectData.defects.push({
-        date: data[0],
-        severities: data.slice(1, -3),
-        toVerify: data[rowLength - 3],
-        opened: data[rowLength - 2],
-        total: data[rowLength - 1]
+      pg.connect(postgresUrl, function(err, client) {
+        client.query(util.format(insertTemplate, 'defect_count'), [
+          data[0], data[1], data[2], data[3], data[4], data[5], data[6]],
+          function (err, defectsResult) {
+            if(err != null) {
+              winston.warn(util.format('unexpected error inserting detect counts: %s', err));
+              res.send(err, 500);
+              return;
+            }
+          }
+        );
       });
     } else {
       rowLength = data.length;
-      defectData.metadata = {
-        date: data[0],
-        severities: data.slice(1, -3),
-        toVerify: data[rowLength - 3],
-        opened: data[rowLength - 2],
-        total: data[rowLength - 1]
-      };
+      pg.connect(postgresUrl, function(err, client) {
+        client.query(util.format(insertTemplate, 'metadata'), [
+          data[0], data[1], data[2], data[3], data[4], data[5], data[6]],
+          function (err, defectsResult) {
+            if(err != null) {
+              winston.warn(util.format('unexpected error inserting metadata: %s', err));
+              res.send(err, 500);
+              return;
+            }
+          }
+        );
+      });
     }
   }).on('end', function (count) {
-    module.defectData = defectData;
-    res.send(defectData);
+    res.redirect('/defects');
   });
 };
