@@ -3,5 +3,5 @@
 # start the app then PORT becomes 5000 even if your env has something else.
 web: node node/src/main.js
 
-# The test task is used to run the Jasmine tests.
-test: node node/test/specs.js
+# The test task is used to run the tests.
+test: vows node/test/server-suite.js

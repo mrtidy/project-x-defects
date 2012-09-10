@@ -6,6 +6,7 @@
     "npm": "1.1.49"
   },
   "dependencies": {
+    "api-easy": "0.3.7",
     "async": "0.1.22",
     "csv": "0.0.19",
     "express": "2.5.11",
