@@ -15,7 +15,8 @@ $(document).ready(function() {
         dataType: "json",
         success: function(defectData, textStatus) {
           $("#defectsList").html(Mustache.render(defectsTemplate, defectData));
-          $("#submitData").removeAttr("disabled");
+          $("#rawData").val('');
+          $("#submitData").removeAttr("disabled");          
         }
       });
     });
@@ -27,6 +28,9 @@ $(document).ready(function() {
       dataType: "json",
       success: function(defectData, textStatus) {
         $("#defectsList").html(Mustache.render(defectsTemplate, defectData));
+      },
+      error: function() {
+        $("#defectsList").html(Mustache.render(defectsTemplate, {}));
       }
     });
 });

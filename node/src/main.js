@@ -19,8 +19,6 @@ process.on('uncaughtException', function (e) {
  *
  * - The view options turns off layouts because I just want Node for the JS
  *   logic and static for client.
- * - The express.bodyParser call tells Express to set req.body to the parsed
- *   value of the request body.
  * - The app.router call just tells Express where the routes come in priority.
  * - The express.static call sets up the static content and makes it the very
  *   last thing (before error handling).
@@ -28,7 +26,6 @@ process.on('uncaughtException', function (e) {
 var app = express.createServer();
 app.configure(function () {
   app.set('view options', {layout: false});
-  app.use(express.bodyParser());
   app.use(app.router);
   app.get('/defects', require('./defects').get);
   app.post('/defects', require('./defects').post);

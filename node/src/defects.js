@@ -5,34 +5,23 @@
  * defects.
  */
 
-var winston = require('winston');
+var csv = require('csv'),
+  winston = require('winston');
+
+// TODO - remove this; just temporarily holding the defect data in memory
+// until I get DB hooked up
+module.defectData;
 
 /*
  * GET /defects will return the list of all defects available.  If there are
  * no defects the this returns 404.
  */
 exports.get = function (req, res) {
-  var defectData = {
-    "metadata": {
-      date: "Date",
-      severities: ["Sev2", "Sev3", "Sev4"],
-      toVerify: "To Verify",
-      opened: "Total Open Defects",
-      total: "Total Bugs"
-    }, 
-    "defects": [
-      {date: "2012-01-01", severities: [1, 229, 61], toVerify: 159, opened: 291, total: 1223},
-      {date: "2012-01-02", severities: [1, 232, 61], toVerify: 147, opened: 294, total: 1228},
-      {date: "2012-01-03", severities: [2, 238, 67], toVerify: 147, opened: 306, total: 1240},
-      {date: "2012-01-04", severities: [2, 237, 66], toVerify: 154, opened: 305, total: 1252},
-      {date: "2012-01-05", severities: [2, 228, 59], toVerify: 170, opened: 289, total: 1261},
-      {date: "2012-01-06", severities: [2, 228, 59], toVerify: 162, opened: 289, total: 1263},
-      {date: "2012-01-07", severities: [2, 228, 59], toVerify: 162, opened: 289, total: 1263},
-      {date: "2012-01-08", severities: [2, 228, 59], toVerify: 161, opened: 289, total: 1263},
-      {date: "2012-01-09", severities: [1, 224, 62], toVerify: 158, opened: 287, total: 1267}
-    ]
-  };
-	res.send(defectData);
+  if(module.defectData) {
+    res.send(module.defectData);
+  } else {
+    res.send(404);
+  }
 };
 
 /*
@@ -44,19 +33,34 @@ exports.get = function (req, res) {
  * the total defects.
  */
 exports.post = function (req, res) {
-  var defectData = {
-    "metadata": {
-      date: "Date",
-      severities: ["Sev2", "Sev3", "Sev4"],
-      toVerify: "To Verify",
-      opened: "Total Open Defects",
-      total: "Total Bugs"
-    }, 
-    "defects": [
-      {date: "2012-01-01", severities: [1, 229, 61], toVerify: 159, opened: 291, total: 1223},
-      {date: "2012-01-02", severities: [1, 232, 61], toVerify: 147, opened: 294, total: 1228},
-      {date: "2012-01-03", severities: [2, 238, 67], toVerify: 147, opened: 306, total: 1240}
-    ]
-  };
-  res.send(defectData);
+  if(!req.is('text/csv')) {
+    res.send('Content-Type: text/csv required.', 400);
+    return;
+  }
+
+  var defectData = { metadata: {}, defects: [] };
+  var rowLength;
+  csv().fromStream(req).on('data', function (data, index) {
+    if(index > 0) {
+      defectData.defects.push({
+        date: data[0],
+        severities: data.slice(1, -3),
+        toVerify: data[rowLength - 3],
+        opened: data[rowLength - 2],
+        total: data[rowLength - 1]
+      });
+    } else {
+      rowLength = data.length;
+      defectData.metadata = {
+        date: data[0],
+        severities: data.slice(1, -3),
+        toVerify: data[rowLength - 3],
+        opened: data[rowLength - 2],
+        total: data[rowLength - 1]
+      };
+    }
+  }).on('end', function (count) {
+    module.defectData = defectData;
+    res.send(defectData);
+  });
 };
