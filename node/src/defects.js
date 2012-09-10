@@ -14,7 +14,8 @@ var async = require('async'),
 var postgresUrl = process.env.DATABASE_URL || 'tcp://defects:defects@localhost/defects';
 
 var insertTemplate = 'INSERT INTO %s(date, sev1, sev2, sev3, to_verify, opened, total) VALUES ($1, $2, $3, $4, $5, $6, $7)';
-var selectTemplate = 'SELECT date, sev1, sev2, sev3, to_verify, opened, total FROM %s';
+var selectMetadataTemplate = 'SELECT date, sev1, sev2, sev3, to_verify, opened, total FROM metadata';
+var selectDefectsTemplate = "SELECT to_char(date, 'yyyy-mm-dd') AS date, sev1, sev2, sev3, to_verify, opened, total FROM defect_count";
 
 /*
  * GET /defects will return the list of all defects available.  If there are
@@ -22,7 +23,7 @@ var selectTemplate = 'SELECT date, sev1, sev2, sev3, to_verify, opened, total FR
  */
 exports.get = function (req, res) {
   pg.connect(postgresUrl, function(err, client) {
-    client.query(util.format(selectTemplate, 'metadata'), function (err, metadataResult) {
+    client.query(selectMetadataTemplate, function (err, metadataResult) {
       if(err != null) {
         winston.warn(util.format('unexpected error querying metadata: %s', err));
         res.send(err, 500);
@@ -46,7 +47,7 @@ exports.get = function (req, res) {
         total: metadataResult.rows[0].total
       };
       pg.connect(postgresUrl, function(err, client) {
-        client.query(util.format(selectTemplate, 'defect_count'), function (err, defectsResult) {
+        client.query(selectDefectsTemplate, function (err, defectsResult) {
           if(err != null) {
             winston.warn(util.format('unexpected error querying defect counts: %s', err));
             res.send(err, 500);
