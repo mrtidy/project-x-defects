@@ -22,3 +22,22 @@ Date,Sev2,Sev3,Sev4,To Verify,Total Open Defects,Total Bugs
 2012-01-08,2,228,59,161,289,1263
 2012-01-09,1,224,62,158,287,1267
 ```
+
+# Developer Guide #
+
+## Requirements ##
+
+You need to install Node v0.8.8, NPM v1.1.49, and PostgreSQL v8.4+ to be able to run the server-side portion of this.
+
+## Steps ##
+
+These steps assume that the requirements above have been installed and that node, npm, and psql are in your path.
+
+``` bash
+git clone git clone https://github.com/mrtidy/project-x-defects.git
+cd project-x-defects
+npm install
+node node/src/main.js
+```
+
+Now you can point your browser at http://localhost:8000/ to view the application.

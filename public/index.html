@@ -7,6 +7,7 @@
 
     <!-- keeping templates inline for this small app -->
     <script id="defectsTemplate" type="text/html">
+      {{^error}}
         <table class="table table-bordered table-condensed table-hover table-striped">
             {{#metadata}}
                 <thead>
@@ -36,8 +37,16 @@
             </tbody>
         </table>
         {{^defects}}
-            <p>Our defects database appears to be empty.  Please add some data.</p>
+            <p class="text-warning">Our defects database appears to be empty.  Please add some data.</p>
         {{/defects}}
+      {{/error}}
+      {{#error}}
+        <p class="text-error">{{error}}</p>
+      {{/error}}
+    </script>
+
+    <script id="averageTemplate" type="text/html">
+      {{}}
     </script>
 </head>
 
