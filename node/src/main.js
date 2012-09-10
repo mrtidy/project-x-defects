@@ -1,5 +1,11 @@
 "use strict";
 
+/*
+ * This file sets up the HTTP server so that it provides the static content
+ * in public as the root content and then sends /defect requests to the
+ * defects.js component.
+ */
+
 var express = require('express'),
   util = require('util'),
   winston = require('winston');
@@ -11,16 +17,21 @@ process.on('uncaughtException', function (e) {
 /*
  * Create and configure the HTTP server.
  *
- * - The view options turns off layouts because I just want Node for the JS logic and static for client.
- * - The express.bodyParser call tells Express to set req.body to the parsed value of the request body.
+ * - The view options turns off layouts because I just want Node for the JS
+ *   logic and static for client.
+ * - The express.bodyParser call tells Express to set req.body to the parsed
+ *   value of the request body.
  * - The app.router call just tells Express where the routes come in priority.
- * - The express.static call sets up the static content and makes it the very last thing (before error handling).
+ * - The express.static call sets up the static content and makes it the very
+ *   last thing (before error handling).
  */
 var app = express.createServer();
 app.configure(function () {
   app.set('view options', {layout: false});
   app.use(express.bodyParser());
   app.use(app.router);
+  app.get('/defects', require('./defects').get);
+  app.post('/defects', require('./defects').post);
   app.use('/', express.static(__dirname + '/../../public'));
 });
 
