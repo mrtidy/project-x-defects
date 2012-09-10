@@ -72,7 +72,7 @@ postgres=# CREATE TABLE defect_count (
 These steps assume that the requirements above have been installed and that node, npm, and psql are in your path.
 
 ``` bash
-git clone git clone https://github.com/mrtidy/project-x-defects.git
+git clone https://github.com/mrtidy/project-x-defects.git
 cd project-x-defects
 npm install
 node node/src/main.js
